@@ -1,6 +1,8 @@
 
 
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:inventoryapp_firebase/controllers/auth.dart';
 import 'package:provider/provider.dart';
@@ -29,21 +31,35 @@ class _AuthScreenState extends State<AuthScreen> {
 
   bool _isLoading = false;
 
+  Timer? _timer;
+
   void _authenticate() async {
     try {
       if (_authMode == AuthMode.login) {
-        await context.read<Auth>().login(email!,password!);
         setState(() {
           _isLoading = true;
         });
+        await context.read<Auth>().login(email!,password!);
 
       } else {
-        await context.read<Auth>().signUp(email!,password!);
         setState(() {
           _isLoading = true;
         });
+        await context.read<Auth>().signUp(email!,password!);
+        await context.read<Auth>().sendEmailVerification();
+        _timer = Timer.periodic(const Duration(seconds: 5), (timer) async{
+          if(context.read<Auth>().isVerified == true){
+            timer.cancel();
+          }
+          await context.read<Auth>().getUserData();
+        });
+
+
       }
     } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
       String errorMessage = 'Failed';
       if (error.toString() == 'EMAIL_EXISTS') {
         errorMessage =
@@ -73,6 +89,16 @@ class _AuthScreenState extends State<AuthScreen> {
             content: Text(errorMessage),
           ));
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if(_timer != null){
+      _timer!.cancel();
+      _timer = null;
+    }
+
   }
 
   @override

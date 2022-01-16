@@ -10,6 +10,8 @@ class Auth with ChangeNotifier {
   String? _userId;
   DateTime? _expiryDate;
 
+  bool isVerified = false;
+
   Timer? _authTimer;
 
   String? get token {
@@ -71,8 +73,10 @@ class Auth with ChangeNotifier {
       _expiryDate = DateTime.now()
           .add(Duration(seconds: int.parse(responseData['expiresIn'])));
 
-      autoLogout();
-      notifyListeners();
+      if(method == 'signInWithPassword'){
+        autoLogout();
+        notifyListeners();
+      }
 
       SharedPreferences _prefs = await SharedPreferences.getInstance();
 
@@ -94,6 +98,41 @@ class Auth with ChangeNotifier {
 
   Future<void> login(String email, String password) async {
     await _authenticate(email, password, 'signInWithPassword');
+  }
+
+  sendEmailVerification()async{
+    String url = 'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyAT2ABNRydBc9-yveTtn33B6g9Fue0H0WI';
+
+    try{
+      await http.post(Uri.parse(url),body: jsonEncode({
+        'requestType':'VERIFY_EMAIL',
+        'idToken':_token,
+      }));
+    }catch(e){
+      rethrow;
+    }
+
+  }
+
+  Future getUserData()async{
+    String url = 'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyAT2ABNRydBc9-yveTtn33B6g9Fue0H0WI';
+
+    try{
+      http.Response response = await http.post(Uri.parse(url),body: jsonEncode({
+        'idToken':_token,
+      }));
+
+      final result = jsonDecode(response.body);
+      if(result['users'][0]['emailVerified'] == true){
+        isVerified = true;
+        autoLogout();
+        notifyListeners();
+      }
+
+
+    }catch(e){
+      rethrow;
+    }
   }
 
   void logout() async {
