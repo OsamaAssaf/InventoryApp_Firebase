@@ -1,31 +1,31 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+
 import 'package:intl/intl.dart';
-import 'package:inventoryapp_firebase/controllers/auth.dart';
-import 'package:inventoryapp_firebase/controllers/theme_controller.dart';
-import 'package:inventoryapp_firebase/database/database.dart';
-import 'package:inventoryapp_firebase/modules/item.dart';
 import 'package:provider/provider.dart';
 
+import 'package:inventory_app_firebase/controllers/auth.dart';
+import 'package:inventory_app_firebase/controllers/theme_controller.dart';
+import 'package:inventory_app_firebase/database/database.dart';
+import 'package:inventory_app_firebase/modules/item.dart';
 import 'add_item.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
   @override
-  _HomeState createState() => _HomeState();
+  HomeState createState() => HomeState();
 }
 
-class _HomeState extends State<Home> {
+class HomeState extends State<Home> {
   List<String> categoryList = ['All', 'Electrical', 'Food', 'Other'];
 
   String category = 'All';
 
   String? currency() {
     Locale locale = Localizations.localeOf(context);
-    NumberFormat format =
-        NumberFormat.simpleCurrency(locale: locale.toString());
+    NumberFormat format = NumberFormat.simpleCurrency(locale: locale.toString());
     return format.currencyName;
   }
 
@@ -67,15 +67,19 @@ class _HomeState extends State<Home> {
                 dropdownColor: Colors.grey,
                 value: category,
                 items: categoryList
-                    .map((value) => DropdownMenuItem<String>(
-                          child: Text(value,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontWeight: FontWeight.normal,
-                              )),
-                          value: value,
-                        ))
+                    .map(
+                      (value) => DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          value,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    )
                     .toList(),
                 onChanged: (newValue) {
                   setState(() {
@@ -110,15 +114,14 @@ class _HomeState extends State<Home> {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       Text(
-                        "Empty",
-                        style: Theme.of(context).textTheme.headline1,
+                        'Empty',
+                        style: Theme.of(context).textTheme.displayLarge,
                       ),
                     ],
                   ),
                 )
               : RefreshIndicator(
-                  onRefresh: () async =>
-                      await context.read<Database>().getItems(),
+                  onRefresh: () async => await context.read<Database>().getItems(),
                   child: ListView.builder(
                     itemCount: itemList.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -183,19 +186,16 @@ class _HomeState extends State<Home> {
                                   padding: const EdgeInsets.all(8.0),
                                   child: Text(
                                     item.name!,
-                                    style:
-                                        Theme.of(context).textTheme.headline1,
+                                    style: Theme.of(context).textTheme.displayLarge,
                                   ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 8.0),
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: [
                                       Text('quantity: ${item.quantity!}'),
-                                      Text(
-                                          'price: ${item.price!} ${currency()}'),
+                                      Text('price: ${item.price!} ${currency()}'),
                                     ],
                                   ),
                                 ),
@@ -217,16 +217,15 @@ class _HomeState extends State<Home> {
               ),
               child: Text(
                 'Inventory App',
-                style: Theme.of(context).textTheme.headline2,
+                style: Theme.of(context).textTheme.displayMedium,
               ),
             ),
             ListTile(
               title: Text(
                 'Delete All',
-                style: Theme.of(context).textTheme.headline3,
+                style: Theme.of(context).textTheme.displaySmall,
               ),
-              trailing: const Icon(Icons.delete_outline_outlined,
-                  color: Colors.black38),
+              trailing: const Icon(Icons.delete_outline_outlined, color: Colors.black38),
               onTap: () {
                 if (itemList.isEmpty) {
                   return;
@@ -239,11 +238,10 @@ class _HomeState extends State<Home> {
                           actions: [
                             TextButton(
                                 onPressed: () async {
-                                  await context
-                                      .read<Database>()
-                                      .deleteAllItem();
-                                  Navigator.of(context).pop();
-                                  Navigator.of(context).pop();
+                                  final NavigatorState navigator = Navigator.of(context);
+                                  await context.read<Database>().deleteAllItem();
+                                  navigator.pop();
+                                  navigator.pop();
                                 },
                                 child: const Text('Ok')),
                             TextButton(
@@ -258,7 +256,7 @@ class _HomeState extends State<Home> {
             ListTile(
               title: Text(
                 'Theme',
-                style: Theme.of(context).textTheme.headline3,
+                style: Theme.of(context).textTheme.displaySmall,
               ),
               trailing: SizedBox(
                 width: 150,
@@ -267,7 +265,7 @@ class _HomeState extends State<Home> {
                   children: [
                     Text(
                       'light',
-                      style: Theme.of(context).textTheme.subtitle2,
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
                     Switch(
                       value: isDark,
@@ -283,7 +281,7 @@ class _HomeState extends State<Home> {
                     ),
                     Text(
                       'dark',
-                      style: Theme.of(context).textTheme.subtitle2,
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
                   ],
                 ),
@@ -292,7 +290,7 @@ class _HomeState extends State<Home> {
             ListTile(
               title: Text(
                 'Log Out',
-                style: Theme.of(context).textTheme.headline3,
+                style: Theme.of(context).textTheme.displaySmall,
               ),
               trailing: const Icon(Icons.logout, color: Colors.black38),
               onTap: () {

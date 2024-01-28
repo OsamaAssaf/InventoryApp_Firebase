@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:inventoryapp_firebase/modules/item.dart';
+
 import 'package:http/http.dart' as http;
+
+import 'package:inventory_app_firebase/modules/item.dart';
 
 class Database with ChangeNotifier {
   String? _token;
@@ -17,8 +19,7 @@ class Database with ChangeNotifier {
   List<Item> itemList = [];
 
   Future<void> addItem(Item item) async {
-    String url =
-        'https://inventory-app-d018c-default-rtdb.firebaseio.com/users/$_userId.json';
+    String url = 'https://inventory-app-d018c-default-rtdb.firebaseio.com/users/$_userId.json';
 
     try {
       await http.post(Uri.parse(url),
@@ -62,8 +63,7 @@ class Database with ChangeNotifier {
   }
 
   Future<void> deleteItem(String id) async {
-    String url =
-        'https://inventory-app-d018c-default-rtdb.firebaseio.com/users/$_userId/$id.json';
+    String url = 'https://inventory-app-d018c-default-rtdb.firebaseio.com/users/$_userId/$id.json';
 
     try {
       await http.delete(Uri.parse(url));
@@ -77,8 +77,7 @@ class Database with ChangeNotifier {
   }
 
   Future<void> deleteAllItem() async {
-    String url =
-        'https://inventory-app-d018c-default-rtdb.firebaseio.com/users/$_userId.json';
+    String url = 'https://inventory-app-d018c-default-rtdb.firebaseio.com/users/$_userId.json';
     try {
       await http.delete(Uri.parse(url));
     } catch (e) {
@@ -111,8 +110,7 @@ class Database with ChangeNotifier {
       });
 
       if (category != null) {
-        itemList =
-            tempList.where((element) => element.category == category).toList();
+        itemList = tempList.where((element) => element.category == category).toList();
       } else {
         itemList = tempList;
       }

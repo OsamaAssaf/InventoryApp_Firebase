@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,9 +16,7 @@ class Auth with ChangeNotifier {
   Timer? _authTimer;
 
   String? get token {
-    if (_expiryDate != null &&
-        _expiryDate!.isAfter(DateTime.now()) &&
-        _token != null) {
+    if (_expiryDate != null && _expiryDate!.isAfter(DateTime.now()) && _token != null) {
       return _token;
     }
     return null;
@@ -28,12 +27,12 @@ class Auth with ChangeNotifier {
   }
 
   Future<bool> tryAutoLogin() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    if (!_prefs.containsKey('userInfo')) {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (!prefs.containsKey('userInfo')) {
       return false;
     }
     Map<String, dynamic> userInfo =
-        jsonDecode(_prefs.getString('userInfo')!) as Map<String, dynamic>;
+        jsonDecode(prefs.getString('userInfo')!) as Map<String, dynamic>;
 
     final DateTime expiryDate = DateTime.parse(userInfo['expiryDate']);
     if (expiryDate.isBefore(DateTime.now())) {
@@ -50,18 +49,13 @@ class Auth with ChangeNotifier {
     return true;
   }
 
-  Future<void> _authenticate(
-      String email, String password, String method) async {
+  Future<void> _authenticate(String email, String password, String method) async {
     String url =
         'https://identitytoolkit.googleapis.com/v1/accounts:$method?key=AIzaSyAT2ABNRydBc9-yveTtn33B6g9Fue0H0WI';
 
     try {
       http.Response response = await http.post(Uri.parse(url),
-          body: jsonEncode({
-            'email': email,
-            'password': password,
-            'returnSecureToken': true
-          }));
+          body: jsonEncode({'email': email, 'password': password, 'returnSecureToken': true}));
 
       final responseData = jsonDecode(response.body);
       if (responseData['error'] != null) {
@@ -70,23 +64,19 @@ class Auth with ChangeNotifier {
 
       _token = responseData['idToken'];
       _userId = responseData['localId'];
-      _expiryDate = DateTime.now()
-          .add(Duration(seconds: int.parse(responseData['expiresIn'])));
+      _expiryDate = DateTime.now().add(Duration(seconds: int.parse(responseData['expiresIn'])));
 
-      if(method == 'signInWithPassword'){
+      if (method == 'signInWithPassword') {
         autoLogout();
         notifyListeners();
       }
 
-      SharedPreferences _prefs = await SharedPreferences.getInstance();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      String userInfo = jsonEncode({
-        'token': _token,
-        'userId': _userId,
-        'expiryDate': _expiryDate!.toIso8601String()
-      });
+      String userInfo = jsonEncode(
+          {'token': _token, 'userId': _userId, 'expiryDate': _expiryDate!.toIso8601String()});
 
-      _prefs.setString('userInfo', userInfo);
+      prefs.setString('userInfo', userInfo);
     } catch (e) {
       rethrow;
     }
@@ -100,37 +90,38 @@ class Auth with ChangeNotifier {
     await _authenticate(email, password, 'signInWithPassword');
   }
 
-  sendEmailVerification()async{
-    String url = 'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyAT2ABNRydBc9-yveTtn33B6g9Fue0H0WI';
+  sendEmailVerification() async {
+    String url =
+        'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyAT2ABNRydBc9-yveTtn33B6g9Fue0H0WI';
 
-    try{
-      await http.post(Uri.parse(url),body: jsonEncode({
-        'requestType':'VERIFY_EMAIL',
-        'idToken':_token,
-      }));
-    }catch(e){
+    try {
+      await http.post(Uri.parse(url),
+          body: jsonEncode({
+            'requestType': 'VERIFY_EMAIL',
+            'idToken': _token,
+          }));
+    } catch (e) {
       rethrow;
     }
-
   }
 
-  Future getUserData()async{
-    String url = 'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyAT2ABNRydBc9-yveTtn33B6g9Fue0H0WI';
+  Future getUserData() async {
+    String url =
+        'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyAT2ABNRydBc9-yveTtn33B6g9Fue0H0WI';
 
-    try{
-      http.Response response = await http.post(Uri.parse(url),body: jsonEncode({
-        'idToken':_token,
-      }));
+    try {
+      http.Response response = await http.post(Uri.parse(url),
+          body: jsonEncode({
+            'idToken': _token,
+          }));
 
       final result = jsonDecode(response.body);
-      if(result['users'][0]['emailVerified'] == true){
+      if (result['users'][0]['emailVerified'] == true) {
         isVerified = true;
         autoLogout();
         notifyListeners();
       }
-
-
-    }catch(e){
+    } catch (e) {
       rethrow;
     }
   }
@@ -144,8 +135,8 @@ class Auth with ChangeNotifier {
       _authTimer = null;
     }
 
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    _prefs.remove('userInfo');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('userInfo');
 
     notifyListeners();
   }
@@ -154,7 +145,7 @@ class Auth with ChangeNotifier {
     if (_authTimer != null) {
       _authTimer!.cancel();
     }
-    final int _timeToExpiry = _expiryDate!.difference(DateTime.now()).inSeconds;
-    _authTimer = Timer(Duration(seconds: _timeToExpiry), logout);
+    final int timeToExpiry = _expiryDate!.difference(DateTime.now()).inSeconds;
+    _authTimer = Timer(Duration(seconds: timeToExpiry), logout);
   }
 }

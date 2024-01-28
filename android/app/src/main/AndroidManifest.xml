@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.assaf.inventoryapp_firebase">
+    package="com.assaf.inventory_app_firebase">
    <application
         android:label="inventoryapp_firebase"
         android:name="${applicationName}"

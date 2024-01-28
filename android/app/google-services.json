@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:821368863024:android:c13f8fc7e160c0b3f9b0f5",
         "android_client_info": {
-          "package_name": "com.assaf.inventoryapp_firebase"
+          "package_name": "com.assaf.inventory_app_firebase"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "821368863024-8pnsresr3hb3rhrrt82p5f38gjapp7t0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.assaf.inventoryapp_firebase",
+            "package_name": "com.assaf.inventory_app_firebase",
             "certificate_hash": "0bf77e441ce6bf2428a090ecf3f595281ec545a7"
           }
         },

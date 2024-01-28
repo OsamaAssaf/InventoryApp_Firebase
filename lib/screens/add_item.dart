@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:inventoryapp_firebase/database/database.dart';
-import 'package:inventoryapp_firebase/modules/item.dart';
 import 'package:provider/provider.dart';
+
+import 'package:inventory_app_firebase/database/database.dart';
+import 'package:inventory_app_firebase/modules/item.dart';
 
 // ignore: must_be_immutable
 class AddItem extends StatefulWidget {
@@ -39,10 +41,10 @@ class AddItem extends StatefulWidget {
   final bool edit;
 
   @override
-  _AddItemState createState() => _AddItemState();
+  AddItemState createState() => AddItemState();
 }
 
-class _AddItemState extends State<AddItem> {
+class AddItemState extends State<AddItem> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final ImagePicker _picker = ImagePicker();
@@ -67,11 +69,10 @@ class _AddItemState extends State<AddItem> {
                               actions: [
                                 TextButton(
                                     onPressed: () async {
-                                      await context
-                                          .read<Database>()
-                                          .deleteItem(widget.id!);
-                                      Navigator.of(context).pop();
-                                      Navigator.of(context).pop();
+                                      final NavigatorState navigator = Navigator.of(context);
+                                      await context.read<Database>().deleteItem(widget.id!);
+                                      navigator.pop();
+                                      navigator.pop();
                                     },
                                     child: const Text('Ok')),
                                 TextButton(
@@ -167,14 +168,19 @@ class _AddItemState extends State<AddItem> {
                         imageUrl: widget.image),
                   );
             } catch (e) {
-              showDialog(
+              if (context.mounted) {
+                showDialog(
                   context: context,
                   builder: (_) => const AlertDialog(
-                        content: Text('Failed to add item, try again!'),
-                      ));
+                    content: Text('Failed to add item, try again!'),
+                  ),
+                );
+              }
             }
           }
-          Navigator.of(context).pop();
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
         }
       },
       child: const Text('Add Item'),
@@ -194,11 +200,10 @@ class _AddItemState extends State<AddItem> {
           decoration: InputDecoration(
             label: Text(
               type,
-              style: Theme.of(context).textTheme.subtitle1,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             border: OutlineInputBorder(
-                borderSide: const BorderSide(width: 2),
-                borderRadius: BorderRadius.circular(15)),
+                borderSide: const BorderSide(width: 2), borderRadius: BorderRadius.circular(15)),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -232,7 +237,7 @@ class _AddItemState extends State<AddItem> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                Text('Category', style: Theme.of(context).textTheme.subtitle1),
+                Text('Category', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(
                   width: 10.0,
                 ),
@@ -241,13 +246,15 @@ class _AddItemState extends State<AddItem> {
                   iconEnabledColor: Colors.white,
                   value: widget.category,
                   items: categoryList
-                      .map((value) => DropdownMenuItem<String>(
-                            child: Text(
-                              value,
-                              style: Theme.of(context).textTheme.subtitle2,
-                            ),
-                            value: value,
-                          ))
+                      .map(
+                        (value) => DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        ),
+                      )
                       .toList(),
                   onChanged: (newValue) {
                     setState(() {
@@ -279,11 +286,10 @@ class _AddItemState extends State<AddItem> {
             decoration: InputDecoration(
               label: Text(
                 type,
-                style: Theme.of(context).textTheme.subtitle1,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
               border: OutlineInputBorder(
-                  borderSide: const BorderSide(width: 2),
-                  borderRadius: BorderRadius.circular(15)),
+                  borderSide: const BorderSide(width: 2), borderRadius: BorderRadius.circular(15)),
               suffix: type == 'Price'
                   ? const Text('\$')
                   : Container(
@@ -339,14 +345,12 @@ class _AddItemState extends State<AddItem> {
                 ),
               ),
               onTap: () async {
-                final XFile? photo =
-                    await _picker.pickImage(source: ImageSource.camera);
+                final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
                 if (photo == null) {
                   return;
                 }
                 setState(() {
-                  widget.image =
-                      base64Encode(File(photo.path).readAsBytesSync());
+                  widget.image = base64Encode(File(photo.path).readAsBytesSync());
                 });
               },
             ),
@@ -366,15 +370,13 @@ class _AddItemState extends State<AddItem> {
                 ),
               ),
               onTap: () async {
-                final XFile? photo =
-                    await _picker.pickImage(source: ImageSource.gallery);
+                final XFile? photo = await _picker.pickImage(source: ImageSource.gallery);
                 if (photo == null) {
                   return;
                 }
 
                 setState(() {
-                  widget.image =
-                      base64Encode(File(photo.path).readAsBytesSync());
+                  widget.image = base64Encode(File(photo.path).readAsBytesSync());
                 });
               },
             ),
